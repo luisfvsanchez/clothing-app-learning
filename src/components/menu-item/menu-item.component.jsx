@@ -23,7 +23,7 @@ MenuItem.propTypes = {
   imageUrl: PropTypes.string,
   size: PropTypes.string,
   linkUrl: PropTypes.string,
-  history: PropTypes.array,
+  history: PropTypes.object,
   match: PropTypes.object,
 };
 

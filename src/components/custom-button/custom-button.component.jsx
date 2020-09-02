@@ -13,6 +13,6 @@ const CustomButton = ({children, isGoogleSignIn, ...otherProps}) => (
 
 CustomButton.propTypes = {
   children: PropTypes.any,
-  isGoogleSignIn: PropTypes.bool,
+  isGoogleSignIn: PropTypes.string,
 };
 export default CustomButton;

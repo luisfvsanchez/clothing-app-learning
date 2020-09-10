@@ -12,6 +12,9 @@ const config = {
   appId: '1:620459277306:web:4c5a3ec9535c77d57cc243',
 };
 
+firebase.initializeApp(config);
+
+
 export const createUserProfileDocument = async (userAuth, additionalData) => {
   if (!userAuth) return;
 
@@ -38,7 +41,8 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
   return userRef;
 };
 
-export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => {
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => 
+{
   const collectionRef = firestore.collection(collectionKey);
 
   const batch = firestore.batch();
@@ -49,13 +53,29 @@ export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => 
   });
 
   return await batch.commit();
-
-}
-
-firebase.initializeApp(config);
+};
 
 export const auth = firebase.auth();
 export const firestore = firebase.firestore();
+
+
+export const convertCollectionsSnapshotToMap = (collections) => {
+  const transformedCollection = collections.docs.map((doc) => {
+    const {title, items} = doc.data();
+    return {
+      routeName: encodeURI(title.toLowerCase()),
+      id: doc.id,
+      title,
+      items,
+    };
+  });
+
+  return transformedCollection.reduce((accumulator, collection) => {
+    accumulator[collection.title.toLowerCase()] = collection;
+    return accumulator;
+  }, {});
+};
+
 
 const provider = new firebase.auth.GoogleAuthProvider();
 provider.setCustomParameters({promtp: 'select_account'});

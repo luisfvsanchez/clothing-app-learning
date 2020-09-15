@@ -5,8 +5,8 @@ import UserActionTypes from './user.types';
 import {auth, googleProvider, createUserProfileDocument, getCurrentUser}
   from '../../firebase/firebase.utils';
 
-import
-{signInFailure, signInSuccess, signOutFailure, signOutSuccess}
+import {signInFailure, signInSuccess, signOutFailure, 
+  signOutSuccess, signUpFailure, signUpSuccess}
   from './user.actions';
 
 export function* onGoogleSignInStart() {
@@ -21,21 +21,32 @@ export function* onSignOutStart() {
   yield takeLatest(UserActionTypes.SIGN_OUT_START, handleSignOut);
 };
 
+export function* onSignUpStart() {
+  yield takeLatest(UserActionTypes.SIGN_UP_START, handleSignUp);
+}
+
 export function* onCheckUserSession() {
   yield takeLatest(UserActionTypes.CHECK_USER_SESSION, handleUserAuth);
 };
 
-export function* handleSignInSnapshot(userAuth) {
+export function* handleSignInSnapshot(userAuth, displayName) {
   try {
-    const userRef = yield call(createUserProfileDocument, userAuth);
+    const userRef = yield call(createUserProfileDocument, userAuth, displayName);
     const userSnapshot = yield userRef.get();
-    yield put(signInSuccess(
+
+    if(!displayName){
+      yield put(signInSuccess(
         {id: userSnapshot.id, ...userSnapshot.data()},
-    ));
+      ));
+    } else {
+      yield put(signUpSuccess(
+        {id: userSnapshot.id, ...userSnapshot.data()},
+      ));
+    }
   } catch (error) {
     yield put(signInFailure(error));
   }
-}
+
 export function* handleSignInWithEmail({payload: {email, password}}) {
   try {
     const {user} = yield auth.signInWithEmailAndPassword(email, password);
@@ -63,6 +74,15 @@ export function* handleUserAuth() {
     yield put(signInFailure(error));
   }
 };
+
+export function* handleSignUp({payload: {email, password, displayName}}) {
+  try {
+    const {user} = yield auth.createUserWithEmailAndPassword(email, password);
+    yield handleSignInSnapshot(user, displayName);
+  } catch (error) {
+    yield put(signUpFailure(error));
+  }
+}
 
 export function* handleSignOut() {
   try {

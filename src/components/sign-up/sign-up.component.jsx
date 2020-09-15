@@ -22,13 +22,14 @@ class SignUp extends React.Component {
   handleSubmit = async (event) => {
     event.preventDefault();
 
+    const {signUpStart} = this.props;
     const {displayName, email, password, confirmPassword} = this.state;
 
     if (password !== confirmPassword){
       alert('Passwords dont match!');
       return;
     }
-    signUpStart(email, password, displayName);
+    signUpStart({email, password, displayName});
   };
 
   handleChange = (event) => {
@@ -83,8 +84,8 @@ class SignUp extends React.Component {
   }
 }
 export const mapDispatchToProps = (dispatch) => ({
-  signUpStart = (email, password, displayName) => 
-    dispatch(signUpStart({email, password, displayName})),
+  signUpStart: (userCredentials) => 
+    dispatch(signUpStart(userCredentials)),
 });
 
 export default connect(null, mapDispatchToProps)(SignUp);

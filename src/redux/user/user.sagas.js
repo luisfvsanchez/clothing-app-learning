@@ -29,23 +29,23 @@ export function* onCheckUserSession() {
   yield takeLatest(UserActionTypes.CHECK_USER_SESSION, handleUserAuth);
 };
 
-export function* handleSignInSnapshot(userAuth, displayName) {
+export function* onSignUpSuccess() {
+  yield takeLatest(UserActionTypes.SIGN_UP_SUCCESS, handleAfterSignUp)
+}
+
+export function* handleSignInSnapshot(userAuth, additionalData) {
   try {
-    const userRef = yield call(createUserProfileDocument, userAuth, displayName);
+    const userRef = yield call(createUserProfileDocument, userAuth, additionalData);
     const userSnapshot = yield userRef.get();
 
-    if(!displayName){
-      yield put(signInSuccess(
-        {id: userSnapshot.id, ...userSnapshot.data()},
-      ));
-    } else {
-      yield put(signUpSuccess(
-        {id: userSnapshot.id, ...userSnapshot.data()},
-      ));
-    }
+    yield put(signInSuccess(
+      {id: userSnapshot.id, ...userSnapshot.data()},
+    ));
+
   } catch (error) {
     yield put(signInFailure(error));
   }
+}
 
 export function* handleSignInWithEmail({payload: {email, password}}) {
   try {
@@ -78,12 +78,15 @@ export function* handleUserAuth() {
 export function* handleSignUp({payload: {email, password, displayName}}) {
   try {
     const {user} = yield auth.createUserWithEmailAndPassword(email, password);
-    yield handleSignInSnapshot(user, displayName);
+    yield put(signUpSuccess({user, additionalData: {displayName}}));
   } catch (error) {
     yield put(signUpFailure(error));
   }
 }
 
+export function* handleAfterSignUp({payload: {user, additionalData}}){
+  yield handleSignInSnapshot(user, additionalData);
+}
 export function* handleSignOut() {
   try {
     yield auth.signOut();
@@ -99,5 +102,8 @@ export function* userSagas() {
     call(onEmailSignInStart),
     call(onCheckUserSession),
     call(onSignOutStart),
+    call(onSignUpStart),
+    call(onSignUpSuccess),
   ]);
 };
+

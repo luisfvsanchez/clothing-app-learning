@@ -10,7 +10,8 @@ import {signInFailure, signInSuccess, signOutFailure,
   from './user.actions';
 
 export function* onGoogleSignInStart() {
-  yield takeLatest(UserActionTypes.GOOGLE_SIGN_IN_START, handleSignInWithGoogle);
+  yield takeLatest(
+      UserActionTypes.GOOGLE_SIGN_IN_START, handleSignInWithGoogle);
 }
 
 export function* onEmailSignInStart() {
@@ -30,18 +31,18 @@ export function* onCheckUserSession() {
 };
 
 export function* onSignUpSuccess() {
-  yield takeLatest(UserActionTypes.SIGN_UP_SUCCESS, handleAfterSignUp)
+  yield takeLatest(UserActionTypes.SIGN_UP_SUCCESS, handleAfterSignUp);
 }
 
 export function* handleSignInSnapshot(userAuth, additionalData) {
   try {
-    const userRef = yield call(createUserProfileDocument, userAuth, additionalData);
+    const userRef = yield call(createUserProfileDocument,
+        userAuth, additionalData);
     const userSnapshot = yield userRef.get();
 
     yield put(signInSuccess(
-      {id: userSnapshot.id, ...userSnapshot.data()},
+        {id: userSnapshot.id, ...userSnapshot.data()},
     ));
-
   } catch (error) {
     yield put(signInFailure(error));
   }
@@ -50,7 +51,7 @@ export function* handleSignInSnapshot(userAuth, additionalData) {
 export function* handleSignInWithEmail({payload: {email, password}}) {
   try {
     const {user} = yield auth.signInWithEmailAndPassword(email, password);
-    yield handleSignInSnapshot(user);
+    yield handleSignInSnapshot(user, null);
   } catch (error) {
     put(signInFailure(error));
   }
@@ -59,7 +60,7 @@ export function* handleSignInWithEmail({payload: {email, password}}) {
 export function* handleSignInWithGoogle() {
   try {
     const {user} = yield auth.signInWithPopup(googleProvider);
-    yield handleSignInSnapshot(user);
+    yield handleSignInSnapshot(user, null);
   } catch (error) {
     yield put(signInFailure(error));
   }
@@ -69,7 +70,7 @@ export function* handleUserAuth() {
   try {
     const userAuth = yield getCurrentUser();
     if (!userAuth) return;
-    yield handleSignInSnapshot(userAuth);
+    yield handleSignInSnapshot(userAuth, null);
   } catch (error) {
     yield put(signInFailure(error));
   }
@@ -84,7 +85,7 @@ export function* handleSignUp({payload: {email, password, displayName}}) {
   }
 }
 
-export function* handleAfterSignUp({payload: {user, additionalData}}){
+export function* handleAfterSignUp({payload: {user, additionalData}}) {
   yield handleSignInSnapshot(user, additionalData);
 }
 export function* handleSignOut() {

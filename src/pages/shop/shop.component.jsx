@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import PropTypes from 'prop-types';
 import {Route} from 'react-router-dom';
 import {connect} from 'react-redux';
@@ -10,25 +10,22 @@ import CollectionsOverviewContainer
   from '../../components/collection-overview/collection-overview.component';
 
 
-class ShopPage extends React.Component {
-  componentDidMount() {
-    const {fethCollectionStart} = this.props;
+const ShopPage = ({fethCollectionStart, match}) => {
+  useEffect(() => {
     fethCollectionStart();
-  }
-  render() {
-    const {match} = this.props;
-    return (
-      <div className='shop-page'>
-        <Route exact path={`${match.path}`}
-          component={CollectionsOverviewContainer} />
+  }, [fethCollectionStart]);
+
+  return (
+    <div className='shop-page'>
+      <Route exact path={`${match.path}`}
+        component={CollectionsOverviewContainer} />
 
 
-        <Route path={`${match.path}/:collectionId`}
-          component={CollectionContainer} />
-      </div>
-    );
-  }
-}
+      <Route path={`${match.path}/:collectionId`}
+        component={CollectionContainer} />
+    </div>
+  );
+};
 
 ShopPage.propTypes = {
   match: PropTypes.object,
